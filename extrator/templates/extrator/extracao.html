@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrator Letterboxd</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; margin: 2em; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 1200px; margin: auto; background: #fff; padding: 2em; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #555; }
+        form { margin-bottom: 1em; }
+        input[type="url"] { width: 70%; padding: 10px; border: 1px solid #ddd; }
+        button { padding: 10px 15px; background: #337ab7; color: #fff; border: none; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1em; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        a { color: #337ab7; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        #loading-message { display: none; text-align: center; padding: 40px; }
+        .spinner { border: 8px solid #f3f3f3; border-top: 8px solid #337ab7; border-radius: 50%; width: 60px; height: 60px; animation: spin 2s linear infinite; margin: auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .filter-container { margin-top: 2em; padding-top: 1em; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="form-container">
+            <h1>Extrator de Listas do Letterboxd</h1>
+            <p>Insira a URL de uma lista pública do Letterboxd para extrair os filmes.</p>
+
+            <form method="post" id="form-extracao">
+                {% csrf_token %}
+                <input type="url" name="letterboxd_url" placeholder="https://letterboxd.com/user/list/example/" required>
+                <button type="submit">Extrair Filmes</button>
+            </form>
+
+            <form action="{% url 'limpar_banco_view' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" 
+                        style="background-color: #d9534f;" 
+                        onclick="return confirm('Tem certeza que deseja apagar TODOS os filmes do banco de dados? Esta ação não pode ser desfeita.');">
+                    Limpar Banco de Dados
+                </button>
+            </form>
+        </div>
+
+        <div id="loading-message">
+            <div class="spinner"></div>
+            <h2>Extraindo dados...</h2>
+            <p>Este processo pode levar alguns minutos. Por favor, aguarde e não feche esta janela.</p>
+        </div>
+
+        <div id="results-container">
+            {% if filmes %}
+                <div class="filter-container">
+                    <form method="GET" action="">
+                        <label for="ordenar_por">Ordenar por:</label>
+                        <select name="ordenar_por" id="ordenar_por" onchange="this.form.submit()">
+                            <option value="id" {% if ordenacao_atual == 'id' %}selected{% endif %}>Ordem de Extração</option>
+                            <option value="melhor_avaliado" {% if ordenacao_atual == 'melhor_avaliado' %}selected{% endif %}>Melhor Avaliado</option>
+                            <option value="pior_avaliado" {% if ordenacao_atual == 'pior_avaliado' %}selected{% endif %}>Pior Avaliado</option>
+                            <option value="alfabetica_az" {% if ordenacao_atual == 'alfabetica_az' %}selected{% endif %}>Ordem Alfabética (A-Z)</option>
+                            <option value="alfabetica_za" {% if ordenacao_atual == 'alfabetica_za' %}selected{% endif %}>Ordem Alfabética (Z-A)</option>
+                            <option value="mais_recente" {% if ordenacao_atual == 'mais_recente' %}selected{% endif %}>Mais Recente</option>
+                            <option value="mais_antigo" {% if ordenacao_atual == 'mais_antigo' %}selected{% endif %}>Mais Antigo</option>
+                        </select>
+                    </form>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Ano</th>
+                            <th>Duração (min)</th>
+                            <th>Diretor</th>
+                            <th>Nota Média</th>
+                            <th>Nº de Avaliações</th>
+                            <th>Sinopse</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for filme in filmes %}
+                        <tr>
+                            <td>{{ filme.id }}</td>
+                            <td>{{ filme.nomeFilme }}</td>
+                            <td>{{ filme.anoFilme }}</td>
+                            <td>{{ filme.duracaoFilme }}</td>
+                            <td>{{ filme.diretorFilme }}</td>
+                            <td>{{ filme.notaFilme|stringformat:".2f"|default_if_none:"-" }}</td>
+                            <td>{{ filme.avaliacoesFilme|default_if_none:"-" }}</td>
+                            <td>{{ filme.sinopseFilme|truncatewords:20 }}</td>
+                            <td><a href="{{ filme.urlFilme }}" target="_blank">Ver no Letterboxd</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form-extracao');
+        const formContainer = document.getElementById('form-container');
+        const loadingMessage = document.getElementById('loading-message');
+        const resultsContainer = document.getElementById('results-container');
+
+        form.addEventListener('submit', function() {
+            formContainer.style.display = 'none';
+            resultsContainer.style.display = 'none';
+            loadingMessage.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
