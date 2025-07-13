@@ -50,7 +50,7 @@ Isso listará todas as bibliotecas Python que utilizámos num ficheiro, tornando
 
 1.  **Clone o repositório:**
     ```bash
-    git clone https://github.com/Danielsups/projeto_letterboxd
+    git clone https://github.com/Danielsups/projeto_letterboxd.git
     ```
 
 2.  **Navegue até o diretório do projeto:**
