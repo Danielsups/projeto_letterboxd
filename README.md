@@ -97,9 +97,3 @@ Isso listará todas as bibliotecas Python que utilizámos num ficheiro, tornando
 2.  **Aguarde o carregamento:** A extração pode demorar alguns minutos. A tela de carregamento indicará que o processo está em andamento.
 3.  **Ordenar os resultados:** Após a tabela ser exibida, use o menu "Ordenar por:" para reorganizar os dados conforme a sua preferência. A lista será atualizada automaticamente.
 4.  **Limpar os dados:** Utilize o botão "Limpar Banco de Dados" para apagar todos os registos e começar de novo. Note que ao extrair uma nova lista, a limpeza já é feita automaticamente.
-
-<br>
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o ficheiro `LICENSE` para mais detalhes.
